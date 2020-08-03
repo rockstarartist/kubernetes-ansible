@@ -4,6 +4,26 @@
   vars_files:
   - env_variables
   tasks:
+
+  #- name: Add IP address of all hosts to all hosts
+  #  lineinfile:
+  #    dest: /etc/hosts
+  #    regexp: '.*{{ hostvars[item].ansible_host }}$'
+  #    line: "{{ hostvars[item].ansible_host }} {{ hostvars[item] }}"
+  #    state: present
+  #  when: hostvars[item].ansible_host is defined
+  #  with_items: "{{ groups.all }}"
+
+  - name: Install python
+    yum:
+      name: python
+      state: present
+
+  - name: Install pip
+    yum:
+      name: python-pip
+      state: present
+
   - name: Disabling Swap on all nodes
     shell: swapoff -a
 
@@ -13,4 +33,35 @@
      regexp: '(^/.*swap*)'
      replace: '# \1'
 
-  
+  - name: Disabling SE Linux Part 1
+    shell: setenforce 0
+
+  - name: Disabling SE Linux Part 2
+    shell: sed -i --follow-symlinks 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+
+  - name: Install br_netfilter
+    shell: modprobe br_netfilter
+
+  - name: Assure that firewalld is started
+    service:
+     name: firewalld
+     state: started
+     enabled: yes
+
+  - name: Allow Network Ports in Firewalld
+    firewalld:
+     port: "{{ ports }}"
+     state: enabled
+     permanent: yes
+     immediate: yes
+
+  - name: Enabling Bridge Firewall Rule
+    shell: "echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables"
+
+  - name: ensure that the k8s.conf file is created
+    copy:
+      src: files/k8s.conf
+      dest: /etc/sysctl.d/k8s.conf
+
+  - name: Load the k8s.conf file
+    shell: sysctl --system

@@ -23,4 +23,10 @@ kubectl get nodes
 * https://medium.com/faun/how-to-create-your-own-kubernetes-cluster-using-ansible-7c6b5c031a5d
 
 
-
+DNS Debugging
+sudo firewall-cmd --add-port=53/udp
+sudo firewall-cmd --add-port=53/tcp
+sudo firewall-cmd --add-port=9153/tcp
+sudo firewall-cmd --add-port=9153/tcp --permanent
+sudo firewall-cmd --add-port=53/tcp --permanent
+sudo firewall-cmd --add-port=53/udp --permanent
