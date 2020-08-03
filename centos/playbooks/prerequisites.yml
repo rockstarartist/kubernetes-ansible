@@ -14,16 +14,6 @@
   #  when: hostvars[item].ansible_host is defined
   #  with_items: "{{ groups.all }}"
 
-  - name: Install python
-    yum:
-      name: python
-      state: present
-
-  - name: Install pip
-    yum:
-      name: python-pip
-      state: present
-
   - name: Disabling Swap on all nodes
     shell: swapoff -a
 
